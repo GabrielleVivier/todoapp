@@ -1,6 +1,7 @@
 class TasksController < ApplicationController
 
   before_filter :find_task, :only => [:show, :edit, :update, :destroy]
+  before_filter :find_info_in_session, :only => [:new]
 
   def index
     @tasks = Task.order(priority: :desc)
@@ -10,7 +11,7 @@ class TasksController < ApplicationController
   end
 
   def new
-   @task = Task.new
+   @task ||= Task.new
   end
 
   def create
@@ -21,7 +22,8 @@ class TasksController < ApplicationController
       redirect_to tasks_path
     else
       flash[:notice] = @task.errors.messages
-      render :template => new_task_path
+      store_info_in_session(@task)
+      redirect_to :back
     end
   end
 
@@ -46,6 +48,12 @@ class TasksController < ApplicationController
   end
   def find_task
     @task = Task.find(params[:id])
+  end
+  def find_info_in_session
+    @task = session[:task]
+  end
+  def store_info_in_session(task)
+    session[:task] = task
   end
 
 end
